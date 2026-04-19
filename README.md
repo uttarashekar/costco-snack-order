@@ -1,12 +1,12 @@
 # Costco Same Day Snack Orderer
 
-Automates adding snacks to your Costco Same Day cart using Playwright and your real Chrome browser. No bot detection — it connects to your running Chrome session via CDP.
+Automates adding snacks to your Costco Same Day cart using Playwright and your real Chrome browser. No bot detection — it connects to your running Chrome session via CDP (Chrome DevTools Protocol).
 
 ## How It Works
 
-1. You launch Chrome with remote debugging enabled (a one-line command)
-2. Log into Costco Same Day in that Chrome window
-3. Run the script — it opens a new tab, adds items to your cart, and stops at checkout for you to review
+1. Launch Chrome with remote debugging enabled (uses a separate profile so your main Chrome is unaffected)
+2. Log into Costco Same Day once in that Chrome window (session persists)
+3. Run the script — it opens a new tab, searches for each item, adds them to your cart with the right quantities, and stops at checkout for you to review
 
 Two modes:
 - **`list`** — adds items from `snacks.json`
@@ -34,17 +34,15 @@ npm run start-chrome
 
 **Linux:**
 ```bash
-google-chrome --remote-debugging-port=9222 &
+google-chrome --remote-debugging-port=9222 --user-data-dir="$HOME/.costco-chrome-profile" --no-first-run &
 ```
 
 **Windows:**
 ```bash
-start chrome --remote-debugging-port=9222
+start chrome --remote-debugging-port=9222 --user-data-dir="%USERPROFILE%\.costco-chrome-profile" --no-first-run
 ```
 
-Chrome opens normally with all your tabs. Log into [sameday.costco.com](https://sameday.costco.com) if you haven't already.
-
-> The Chrome profile is stored at `~/.costco-chrome-profile` (Mac). Your regular Chrome profile is unaffected.
+A separate Chrome window opens. Log into [sameday.costco.com](https://sameday.costco.com) — your session is saved in `~/.costco-chrome-profile` for future runs.
 
 ### 2. Run the script
 
@@ -60,19 +58,16 @@ The script stops at checkout so you can review before placing the order.
 
 ## Customizing Your Snack List
 
-Edit `snacks.json`:
+Edit `snacks.json`. Each item has a name (searched on Costco Same Day) and quantity:
 
 ```json
 {
   "items": [
-    "Kirkland Signature Mixed Nuts",
-    "Goldfish Cheddar Crackers",
-    "Skinny Pop Popcorn"
+    { "name": "Skinny Pop Organic Popcorn, 14 oz", "qty": 2 },
+    { "name": "RXBAR Protein Bars, Variety Pack, 14-count", "qty": 1 }
   ]
 }
 ```
-
-Items are searched by name on Costco Same Day and the first result is added.
 
 ## Config (.env)
 
@@ -83,10 +78,11 @@ Items are searched by name on Costco Same Day and the first result is added.
 
 ## Notes
 
-- Chrome must be launched with `--remote-debugging-port` for the script to connect
-- Costco Same Day's UI may change over time — selectors in `order.js` may need updating
-- The script saves debug screenshots (`debug-orders-page.png`, `debug-order-detail.png`) when the reorder flow can't find the expected buttons
-- No credentials are stored — authentication is handled through your Chrome session
+- **First time only:** you need to quit your regular Chrome before running `npm run start-chrome`. After that, the debugging Chrome stays open and you can reopen your regular Chrome separately.
+- Your Costco login session persists in `~/.costco-chrome-profile` — you only log in once.
+- No credentials are stored — authentication is handled through your Chrome session.
+- Costco Same Day's UI may change over time — selectors in `order.js` may need updating.
+- The script saves debug screenshots when the reorder flow can't find expected buttons.
 
 ## License
 
