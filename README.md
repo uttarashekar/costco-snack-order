@@ -1,12 +1,14 @@
 # Costco Same Day Snack Orderer
 
-Automates adding snacks to your Costco Same Day cart using Playwright and your real Chrome browser. No bot detection — it connects to your running Chrome session via CDP (Chrome DevTools Protocol).
+Automates adding snacks to your Costco Same Day cart using Playwright and your real Chrome browser. Uses a lightweight AI agent layer (Claude Haiku) to intelligently pick the right products from search results — no brittle exact-match logic.
 
 ## How It Works
 
 1. Launch Chrome with remote debugging enabled (uses a separate profile so your main Chrome is unaffected)
 2. Log into Costco Same Day once in that Chrome window (session persists)
-3. Run the script — it opens a new tab, searches for each item, finds the best matching product card using keyword scoring, adds them to your cart with the right quantities, and stops at checkout for you to review
+3. Run the script — it opens a new tab, searches for each item, uses an LLM to identify the best matching product from results, adds them to your cart with the right quantities, and stops at checkout for you to review
+
+The **agentic** part: instead of relying on fragile keyword matching or exact product names, the script sends search results to Claude Haiku and asks it to reason about which product best matches your intent. This handles abbreviations, name variations, similar products, and ambiguous results that would trip up a purely rule-based approach.
 
 Two modes:
 - **`list`** — adds items from `snacks.json`
@@ -75,6 +77,14 @@ Edit `snacks.json`. Each item has a name (searched on Costco Same Day) and quant
 |---|---|
 | `DELIVERY_ADDRESS` | Your delivery address as you'd type it on Costco Same Day |
 | `CDP_PORT` | Chrome debug port (default: `9222`) |
+| `ANTHROPIC_API_KEY` | Anthropic API key for smart product matching (optional) |
+
+## Product Matching
+
+When searching for items, the script needs to pick the right product from search results. Two modes:
+
+- **LLM matching** (if `ANTHROPIC_API_KEY` is set) — sends product names to Claude Haiku to pick the best match. Handles ambiguous names, abbreviations, and similar products well.
+- **Keyword matching** (fallback) — scores products by keyword overlap with the item name. Works for exact or near-exact names.
 
 ## Notes
 

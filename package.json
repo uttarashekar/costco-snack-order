@@ -9,6 +9,7 @@
     "reorder": "node order.js reorder"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.90.0",
     "dotenv": "16.4.7",
     "playwright": "1.52.0"
   }
