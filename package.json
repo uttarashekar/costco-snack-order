@@ -1,0 +1,15 @@
+{
+  "name": "costco-snack-order",
+  "version": "1.0.0",
+  "description": "Automate Costco Same Day snack orders",
+  "main": "order.js",
+  "scripts": {
+    "start-chrome": "bash start-chrome.sh",
+    "order": "node order.js list",
+    "reorder": "node order.js reorder"
+  },
+  "dependencies": {
+    "dotenv": "16.4.7",
+    "playwright": "1.52.0"
+  }
+}
