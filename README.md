@@ -6,7 +6,7 @@ Automates adding snacks to your Costco Same Day cart using Playwright and your r
 
 1. Launch Chrome with remote debugging enabled (uses a separate profile so your main Chrome is unaffected)
 2. Log into Costco Same Day once in that Chrome window (session persists)
-3. Run the script — it opens a new tab, searches for each item, adds them to your cart with the right quantities, and stops at checkout for you to review
+3. Run the script — it opens a new tab, searches for each item, finds the best matching product card using keyword scoring, adds them to your cart with the right quantities, and stops at checkout for you to review
 
 Two modes:
 - **`list`** — adds items from `snacks.json`

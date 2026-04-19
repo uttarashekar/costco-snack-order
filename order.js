@@ -42,28 +42,70 @@ async function setDeliveryAddress(page) {
   console.log("Address set.");
 }
 
-async function searchAndAdd(page, name, qty) {
-  console.log(`Searching for: ${name} (x${qty})`);
-  await page.goto(`${SAMEDAY_URL}/store/search?search=${encodeURIComponent(name)}`, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(3000);
+function shortenQuery(name) {
+  // Use only the brand + product type (first 3-4 words), drop sizes/counts/commas
+  const cleaned = name.split(",")[0].trim();
+  const words = cleaned.split(/\s+/).slice(0, 6);
+  return words.join(" ");
+}
 
-  const addBtn = page.locator('button:has-text("Add")').first();
-  if (await addBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-    await addBtn.click();
-    await page.waitForTimeout(1000);
-    // Increase quantity by clicking + button
-    for (let i = 1; i < qty; i++) {
-      const plusBtn = page.locator('button[aria-label="Increment quantity"], button:has-text("+")').first();
-      if (await plusBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+async function searchAndAdd(page, name, qty) {
+  const query = shortenQuery(name);
+  console.log(`Searching for: "${query}" (x${qty})`);
+
+  // Navigate with correct Costco Same Day search URL format
+  const url = `${SAMEDAY_URL}/store/costco/s?k=${encodeURIComponent(query)}`;
+  await page.goto(url, { waitUntil: "load" });
+  await page.waitForTimeout(5000);
+
+  // Verify search results loaded by checking URL still contains search param
+  const currentUrl = page.url();
+  if (!currentUrl.includes("?k=")) {
+    console.log(`  ⚠ Redirected away from search, retrying...`);
+    await page.goto(url, { waitUntil: "load" });
+    await page.waitForTimeout(5000);
+  }
+
+  // Find the product card that best matches the item name, then click its Add button
+  const allCards = page.locator('li');
+  const cardCount = await allCards.count();
+  let matched = false;
+
+  // Build keywords from the original name for matching
+  const keywords = name.toLowerCase().split(/[\s,]+/).filter(w => w.length > 2);
+
+  let bestIndex = -1;
+  let bestScore = 0;
+  for (let i = 0; i < cardCount; i++) {
+    const hasAddBtn = await allCards.nth(i).locator('button', { hasText: /^Add$/ }).count() > 0;
+    if (!hasAddBtn) continue;
+    const cardText = (await allCards.nth(i).textContent()).toLowerCase();
+    const matchScore = keywords.filter(kw => cardText.includes(kw)).length;
+    if (matchScore > bestScore) {
+      bestScore = matchScore;
+      bestIndex = i;
+    }
+  }
+
+  if (bestIndex >= 0 && bestScore >= Math.min(3, keywords.length)) {
+    await allCards.nth(bestIndex).locator('button', { hasText: /^Add$/ }).click();
+    await page.waitForTimeout(2000);
+    for (let q = 1; q < qty; q++) {
+      const plusBtn = allCards.nth(bestIndex).locator('button[aria-label*="Increment"]');
+      if (await plusBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
         await plusBtn.click();
         await page.waitForTimeout(500);
       }
     }
     console.log(`  ✓ Added: ${name} x${qty}`);
-    return true;
+    matched = true;
   }
-  console.log(`  ✗ Could not find: ${name}`);
-  return false;
+
+  if (!matched) {
+    console.log(`  ✗ Could not find matching product for: ${name}`);
+    await page.screenshot({ path: `debug-search-${query.slice(0, 20).replace(/\s+/g, "-")}.png` });
+  }
+  return matched;
 }
 
 async function addItemsFromList(page) {
@@ -106,7 +148,7 @@ async function reorderFromHistory(page) {
 
 async function goToCheckout(page) {
   console.log("\nOpening cart...");
-  await page.goto(`${SAMEDAY_URL}/store/cart`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${SAMEDAY_URL}/store/costco/storefront?cart_open`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(3000);
 
   const checkoutBtn = page.locator('button:has-text("Go to Checkout"), button:has-text("Checkout"), a:has-text("Checkout")').first();
