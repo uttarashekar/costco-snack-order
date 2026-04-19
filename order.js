@@ -42,19 +42,27 @@ async function setDeliveryAddress(page) {
   console.log("Address set.");
 }
 
-async function searchAndAdd(page, item) {
-  console.log(`Searching for: ${item}`);
-  await page.goto(`${SAMEDAY_URL}/store/search?search=${encodeURIComponent(item)}`, { waitUntil: "domcontentloaded" });
+async function searchAndAdd(page, name, qty) {
+  console.log(`Searching for: ${name} (x${qty})`);
+  await page.goto(`${SAMEDAY_URL}/store/search?search=${encodeURIComponent(name)}`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(3000);
 
   const addBtn = page.locator('button:has-text("Add")').first();
   if (await addBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
     await addBtn.click();
     await page.waitForTimeout(1000);
-    console.log(`  ✓ Added: ${item}`);
+    // Increase quantity by clicking + button
+    for (let i = 1; i < qty; i++) {
+      const plusBtn = page.locator('button[aria-label="Increment quantity"], button:has-text("+")').first();
+      if (await plusBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await plusBtn.click();
+        await page.waitForTimeout(500);
+      }
+    }
+    console.log(`  ✓ Added: ${name} x${qty}`);
     return true;
   }
-  console.log(`  ✗ Could not find: ${item}`);
+  console.log(`  ✗ Could not find: ${name}`);
   return false;
 }
 
@@ -62,7 +70,9 @@ async function addItemsFromList(page) {
   console.log(`\nAdding ${items.length} items from snacks.json...\n`);
   let added = 0;
   for (const item of items) {
-    if (await searchAndAdd(page, item)) added++;
+    const name = typeof item === "string" ? item : item.name;
+    const qty = typeof item === "string" ? 1 : (item.qty || 1);
+    if (await searchAndAdd(page, name, qty)) added++;
   }
   console.log(`\nAdded ${added}/${items.length} items.`);
 }

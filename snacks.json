@@ -1,12 +1,16 @@
 {
   "items": [
-    "Kirkland Signature Mixed Nuts",
-    "Kirkland Signature Trail Mix",
-    "Goldfish Cheddar Crackers",
-    "Kirkland Signature Protein Bars",
-    "Skinny Pop Popcorn",
-    "Kirkland Signature Cashew Clusters",
-    "Frito Lay Variety Pack",
-    "Kirkland Signature Dried Mangoes"
+    { "name": "PopCorners Popped Corn Snacks Variety Pack, 1 oz, 30-Count", "qty": 1 },
+    { "name": "Skinny Pop Organic Popcorn, 14 oz", "qty": 2 },
+    { "name": "Kirkland Signature, Organic Coconut Water, 11.1 fl oz, 12-count", "qty": 1 },
+    { "name": "Kirkland Signature Organic Roasted Seaweed, 0.6 oz, 10-count", "qty": 1 },
+    { "name": "Fairlife Nutrition Plan, 30g Protein Shake, Chocolate, 11.5 fl oz, 18-pack", "qty": 2 },
+    { "name": "Orgain 30g Milk Protein Shake, Chocolate Fudge, 11 fl oz, 18-pack", "qty": 1 },
+    { "name": "RXBAR Protein Bars, Variety Pack, 14-count", "qty": 1 },
+    { "name": "Nature's Garden Organic Trail Mix Snack Packs, Variety Pack, 1.2 oz, 24-count", "qty": 2 },
+    { "name": "Kirkland Signature Snacking Nuts, Variety Pack, 1.6 oz, 30-count", "qty": 1 },
+    { "name": "Glico Pocky Cream Covered Biscuit Sticks, Variety Pack, 1.41 oz, 12-count", "qty": 2 },
+    { "name": "Nabisco Cookies & Crackers, Variety Pack, 1 oz, 40-count", "qty": 1 },
+    { "name": "Ferrero Rocher, Milk Chocolate Hazelnut Candy, 21.2 oz, 48 Count", "qty": 1 }
   ]
 }
